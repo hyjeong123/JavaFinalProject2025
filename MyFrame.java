@@ -11,7 +11,13 @@ public class MyFrame extends JFrame {
     // SettingPanel에서 받은 값 저장
     private int wormquantity;
     private int playersize;
-
+   
+    // 플레이어 지렁이의 스피드를 바꾸기 위함
+    private int playerspeed;
+    
+    // 플레이어가 쏠 수 있는 총알 개수
+    private int bulletquantity;
+    
     public MyFrame() {
         layout = new CardLayout();
         cardPanel = new JPanel(layout);
@@ -48,7 +54,13 @@ public class MyFrame extends JFrame {
     public void setsize(int size) {
         playersize = size;
     }
-
+    
+    public int bulletquantity() {
+    	return bulletquantity;
+    }
+    public void bulletquantity(int bulletquantity) {
+    	bulletquantity = this.bulletquantity;
+    }
     // 게임 시작 버튼 클릭 시 호출
     public void startGame() {
         GamePanel gamepanel = new GamePanel(this); // 새로 생성

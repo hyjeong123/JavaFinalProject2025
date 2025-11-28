@@ -15,13 +15,16 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
     private MyFrame frame;
     
+    // 객체 생성 영역
     // player 객체 생성, 가변적배열 bots 객체 생성
     private PlayerWorm player;
     private ArrayList<BotWorm> bots = new ArrayList<>();
+    private ArrayList<Food> food = new ArrayList<>();
     
     // player 지렁이 크기, 싸울 봇 지렁이 개수
     private int bodysize;
     private int quantity;
+    private int playerspeed;
     
     // player 시작점 (x, y)
     private int mouseX = 400;
@@ -45,19 +48,26 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         bodysize = frame.getsize();
         quantity = frame.getquantity();
 
-        player = new PlayerWorm(400, 300, bodysize);
+        player = new PlayerWorm(400, 300, bodysize, playerspeed);
 
         bots = new ArrayList<>();
         for (int i = 0; i < quantity; i++) {
             int botX = (int)(Math.random() * 800);
             int botY = (int)(Math.random() * 600);
             int botsize = (int)(Math.random() * 80) + 20;
-            bots.add(new BotWorm(botX, botY, botsize));
+            bots.add(new BotWorm(botX, botY, botsize, 5));
         }
 
         timer = new Timer(16, e -> {
             player.move(mouseX, mouseY);
+            for (BotWorm bot : bots) {
+                bot.move(player.x, player.y);
+            }
             repaint();
+            
+            for (Bullet b : bullets) {
+            	b.move(); // 이런 메서드 필요
+            }
         });
         timer.start();
 
@@ -66,17 +76,29 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
 
 
-    @Override public void keyTyped(KeyEvent e) { }
-    @Override public void keyReleased(KeyEvent e) { }
+    @Override 
+    public void keyTyped(KeyEvent e) { }
+    
+    @Override 
+    public void keyReleased(KeyEvent e) { 
+    	if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+    		player.setplayerspeed(5);
+    	}
+    }
 
     @Override
     public void keyPressed(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_S) {
             bullets.add(new Bullet(player.x, player.y, mouseX, mouseY));
         }
+        
+        if (e.getKeyCode() == KeyEvent.VK_SPACE) {
+        	player.setplayerspeed(7);
+        }
     }
 
-    @Override public void mouseDragged(MouseEvent e) {}
+    @Override 
+    public void mouseDragged(MouseEvent e) { }
 
     @Override
     public void mouseMoved(MouseEvent e) {
@@ -98,6 +120,21 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             g.setColor(Color.GREEN);
             g.fillOval(c.x - 6, c.y - 6, 12, 12);
         }
+        
+        // 봇 지렁이들 그리기
+        for (BotWorm b : bots) {
+            for (int i = 0; i < b.body.size(); i++) {
+                Worm.Circle c = b.body.get(i);
+                g.setColor(Color.YELLOW);
+                g.fillOval(c.x - 6, c.y - 6, 12, 12);
+            }
+
+            // 봇 머리 강조
+            g.setColor(Color.WHITE);
+            Worm.Circle bh = b.body.get(0);
+            g.drawOval(bh.x - 7, bh.y - 7, 14, 14);
+        }
+
 
         // 머리 강조
         g.setColor(Color.WHITE);
@@ -105,9 +142,16 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         g.drawOval(head.x - 7, head.y - 7, 14, 14);
 
         // 총알
-        g.setColor(Color.YELLOW);
+        g.setColor(Color.RED);
         for (Bullet b : bullets) {
             g.fillOval(b.x - 3, b.y - 3, 6, 6);
         }
+        
+        // 먹이
+        g.setColor(Color.WHITE);
+        for (Food f : food) {
+            g.fillOval(f.x - f.size, f.y - f.size, f.size*2, f.size*2);
+        }
+
     }
 }

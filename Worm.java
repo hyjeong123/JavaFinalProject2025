@@ -18,7 +18,7 @@ public class Worm {
     public ArrayList<Circle> body = new ArrayList<>();
     
     // 생성자 영역, size크기만큼 지렁이를 만드는 생성자 Worm
-    public Worm(int startX, int startY, int size) {
+    public Worm(int startX, int startY, int size, int speed) {
         this.x = startX;
         this.y = startY;
                
