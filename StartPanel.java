@@ -1,46 +1,49 @@
 package Slither;
 
-import java.awt.Graphics;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
-
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingConstants;
 
 public class StartPanel extends JPanel implements ActionListener {
 
-    private MyFrame frame; 
-    private JPanel title;
+    private MyFrame frame;
     private JLabel name;
     private JButton start;
-    private BufferedImage smileworm;
+
     public StartPanel(MyFrame frame) {
         this.frame = frame;
         
-        title = new JPanel();
-        add(title);
-        
-        name = new JLabel("지렁이 게임");
-        add(name);
+        setLayout(new BorderLayout());
+        setBackground(Color.LIGHT_GRAY);
+
+        name = new JLabel("지렁이 게임", SwingConstants.CENTER);
+        name.setFont(new Font("맑은 고딕", Font.BOLD, 48));
         
         start = new JButton("플레이 하기");
-        add(start);
+        start.setFont(new Font("맑은 고딕", Font.BOLD, 24));
+        start.setPreferredSize(new Dimension(250, 60));
+        
+        JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+        buttonPanel.add(start);
 
-        start.addActionListener(this);  
+        add(name, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
+
+        start.addActionListener(this); 
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == start) {
-            frame.showPanel("Setting");  
+            frame.showPanel("Setting");
         }
-    }
-    
-    @Override
-    public void paintComponent(Graphics g) {
-    	super.paintComponent(g);
-    	g.drawImage(smileworm, 0, 0, 650, 650, null);
     }
 }

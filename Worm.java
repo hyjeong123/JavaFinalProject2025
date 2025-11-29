@@ -1,63 +1,95 @@
 package Slither;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Worm {
-    public int x, y;          // 머리 좌표
-    public int speed = 5; 	  // 스피드
-    
-    // 몸을 구성하는 원 중 머리의 원, 생성자는 (x, y)에 원을 생성한다
-    public class Circle {
-        public int x, y;
-        public Circle(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
-    }
-    // body 객체를 ArrayList로 만든다, body 가변적 배열 생성
-    public ArrayList<Circle> body = new ArrayList<>();
-    
-    // 생성자 영역, size크기만큼 지렁이를 만드는 생성자 Worm
-    public Worm(int startX, int startY, int size, int speed) {
-        this.x = startX;
-        this.y = startY;
-               
-        for (int i = 0; i < size; i++) {
-            body.add(new Circle(startX - (i * 10), startY));
-        }
-        		
-    }
 
-    // 뒤의 도트들이 따라오는 함수
-    public void move(int targetX, int targetY) {
-        // 머리 방향 계산(벡터값)
-        double directionx = targetX - x;
-        double directiony = targetY - y;
-        double dist = Math.sqrt(directionx * directionx + directiony * directiony);
+    private double x, y;
+    private int speed;
+    private final ArrayList<Circle> body = new ArrayList<>();
+
+    // Collision에서 접근 가능하도록 public static으로 선언하고, 필드는 private final로 캡슐화
+    public static class Circle { 
+        private final double x, y;
         
-        if (dist != 0) {
-            x += (directionx / dist) * speed;
-            y += (directiony / dist) * speed;
-        }
-
-        // 몸통 위치 업데이트 (앞이 뒤로 따라오게)
-        for (int i = body.size() - 1; i > 0; i--) {
-            body.get(i).x = body.get(i - 1).x;
-            body.get(i).y = body.get(i - 1).y;
-        }
-
-        // 머리 위치를 body[0]에 반영
-        body.get(0).x = x;
-        body.get(0).y = y;
+        public Circle(double x, double y) { this.x = x; this.y = y; }
+        
+        // Collision과 GamePanel에서 사용하는 Getter
+        public int getIntX() { return (int)x; } 
+        public int getIntY() { return (int)y; }
+        public double getX() { return x; }
+        public double getY() { return y; }
     }
     
-    // 총알 맞을때
-    public boolean hit() {
+    // Worm의 위치 Getter
+    public double getX() {
+    	return this.x;
+    }
+    public double getY() {
+    	return this.y;
+    }
+    
+    // speed Getter/Setter
+    public void setSpeed(int s) {
+        this.speed = s;
+    }
+
+    public int getSpeed() {
+        return this.speed;
+    }
+    
+    // Collision과 GamePanel에서 사용하는 Body Getter
+    public List<Circle> getBody() {
+        // 외부에서의 수정을 방지하기 위해 UnmodifiableList 반환
+        return Collections.unmodifiableList(body);
+    }
+    
+    public Circle getHead() {
+        if (body.isEmpty()) return null;
+        return body.get(0);
+    }
+    
+    public Worm(int x, int y, int size, int speed) {
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
+
+        for (int i = 0; i < size; i++) {
+            body.add(new Circle(x, y)); 
+        }
+    }
+
+    // 지렁이 이동 및 방향 계산
+    public void move(int targetX, int targetY) {
+        double dx = targetX - x;
+        double dy = targetY - y;
+        double dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist != 0) {
+            x += (dx / dist) * speed;
+            y += (dy / dist) * speed;
+        }
+
+        // 몸통 업데이트 로직: 새 머리 추가, 꼬리 제거
+        body.add(0, new Circle(x, y));
+        body.remove(body.size() - 1);
+    }
+
+    // 길이 증가
+    public void increase() {
+        // 현재 꼬리 위치에 새 세그먼트 추가
+        if (!body.isEmpty()) {
+            Circle tail = body.get(body.size() - 1);
+            body.add(new Circle(tail.getX(), tail.getY()));
+        }
+    }
+
+    // 길이 감소 (총알 피격 시 사용)
+    public void decrease() {
         if (body.size() > 1) {
-            body.remove(body.size() - 1);  // 꼬리 제거
-            return false; // 아직 안죽음
-        } else {
-            return true; // 죽음
+            body.remove(body.size() - 1);
         }
     }
 }

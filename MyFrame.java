@@ -8,26 +8,30 @@ public class MyFrame extends JFrame {
     private CardLayout layout;
     private JPanel cardPanel;
 
-    // SettingPanel에서 받은 값 저장
-    private int wormquantity;
-    private int playersize;
-   
-    // 플레이어 지렁이의 스피드를 바꾸기 위함
-    private int playerspeed;
-    
-    // 플레이어가 쏠 수 있는 총알 개수
-    private int bulletquantity;
-    
+    private StartPanel startPanel;
+    private SettingPanel settingPanel;
+    private FinPanel finPanel;
+    private GamePanel currentGamePanel; // 현재 실행 중인 GamePanel 인스턴스
+
+    // 설정 값 필드
+    private int wormQuantity;
+    private int playerSize;
+    private int playerSpeed = 5; // 기본 속도
+    private int bulletQuantity;
+    private boolean hasShield = false; 
+
     public MyFrame() {
         layout = new CardLayout();
         cardPanel = new JPanel(layout);
 
-        StartPanel startpanel = new StartPanel(this);
-        SettingPanel settingpanel = new SettingPanel(this);
-
-        cardPanel.add(startpanel, "Start");
-        cardPanel.add(settingpanel, "Setting");
-
+        startPanel = new StartPanel(this);
+        settingPanel = new SettingPanel(this);
+        finPanel = new FinPanel(this);
+        
+        cardPanel.add(startPanel, "Start");
+        cardPanel.add(settingPanel, "Setting");
+        cardPanel.add(finPanel, "Fin");
+        
         add(cardPanel);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -41,30 +45,38 @@ public class MyFrame extends JFrame {
         layout.show(cardPanel, name);
     }
 
-    public int getquantity() {
-        return wormquantity;
-    }
-    public void setquantity(int quantity) {
-        wormquantity = quantity;
-    }
+    // 설정 값 Getter/Setter
+    public int getWormQuantity() { return wormQuantity; }
+    public void setWormQuantity(int quantity) { this.wormQuantity = quantity; }
 
-    public int getsize() {
-        return playersize;
-    }
-    public void setsize(int size) {
-        playersize = size;
+    public int getPlayerSize() { return playerSize; }
+    public void setPlayerSize(int size) { this.playerSize = size; }
+    
+    public int getPlayerSpeed() { return playerSpeed; }
+    public void setPlayerSpeed(int speed) { this.playerSpeed = speed; } // 현재는 사용 안 함
+    
+    public int getBulletQuantity() { return bulletQuantity; }
+    public void setBulletQuantity(int quantity) { this.bulletQuantity = quantity; }
+    
+    public boolean getHasShield() { return hasShield; }
+    public void setHasShield(boolean hasShield) { this.hasShield = hasShield; }
+
+    // 게임 시작 (메모리 관리 로직 포함)
+    public void startGame() {
+        // 기존 게임 패널 제거 (메모리 누수 방지)
+        if (currentGamePanel != null) {
+            cardPanel.remove(currentGamePanel);
+        }
+        
+        currentGamePanel = new GamePanel(this); 
+        cardPanel.add(currentGamePanel, "Game"); 
+        
+        showPanel("Game");
     }
     
-    public int bulletquantity() {
-    	return bulletquantity;
-    }
-    public void bulletquantity(int bulletquantity) {
-    	bulletquantity = this.bulletquantity;
-    }
-    // 게임 시작 버튼 클릭 시 호출
-    public void startGame() {
-        GamePanel gamepanel = new GamePanel(this); // 새로 생성
-        cardPanel.add(gamepanel, "Game");          // 카드에 추가
-        showPanel("Game");                         // 전환
+    // 게임 종료 및 FinPanel 전환
+    public void gameOver(int finalScore) {
+        finPanel.setFinalScore(finalScore); 
+        showPanel("Fin");
     }
 }
