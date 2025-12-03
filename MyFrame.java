@@ -18,7 +18,7 @@ public class MyFrame extends JFrame {
     private int playerSize;
     private int playerSpeed = 5; // 기본 속도
     private int bulletQuantity;
-    private boolean hasShield = false; 
+    private boolean hasShield = false; 	
 
     public MyFrame() {
         layout = new CardLayout();

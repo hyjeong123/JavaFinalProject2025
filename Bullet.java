@@ -30,13 +30,23 @@ public class Bullet {
     }
 
     // Getter/Setter
-    public int getIntX() { return (int)x; }
-    public int getIntY() { return (int)y; }
+    public int getIntX() { 
+    	return (int)x; 
+    	}
+    public int getIntY() { 
+    	return (int)y; 
+    	}
 
-    public double getX() { return x; }
-    public double getY() { return y; }
+    public double getX() { 
+    	return x; 
+    	}
+    public double getY() { 
+    	return y; 
+    	}
     
-    public boolean isAlive() { return alive; }
+    public boolean isAlive() { 
+    	return alive; 
+    	}
     public void setDead() { this.alive = false; } 
     
     // 경계 체크

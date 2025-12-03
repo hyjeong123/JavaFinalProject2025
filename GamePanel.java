@@ -46,16 +46,21 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         final int PLAYER_START_Y = 300; 
         final int MIN_SAFE_DISTANCE = 200; 
         
+        // 🚨 [수정] 게임 영역 크기를 미리 정의합니다 (1200x600)
+        final int GAME_WIDTH = 1200; 
+        final int GAME_HEIGHT = 600; 
+        
         player = new PlayerWorm(PLAYER_START_X, PLAYER_START_Y, playerSize, 5);
         
-        // 봇 초기화 및 플레이어 주변 회피 로직 (이전과 동일)
+        // 봇 초기화 및 플레이어 주변 회피 로직
         for (int i = 0; i < quantity; i++) {
             int botX, botY;
             boolean tooClose;
             
             do {
-                botX = (int)(Math.random() * getWidth());
-                botY = (int)(Math.random() * getHeight());
+                // 🚨 [수정] 봇 생성 시 GAME_WIDTH, GAME_HEIGHT 사용
+                botX = (int)(Math.random() * GAME_WIDTH); 
+                botY = (int)(Math.random() * GAME_HEIGHT);
                 
                 double dx = botX - PLAYER_START_X;
                 double dy = botY - PLAYER_START_Y;
@@ -71,22 +76,19 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         
         // 초기 먹이 생성
         for (int i = 0; i < MAX_FOOD_COUNT; i++) {
-            spawnFood();
+            spawnFood(GAME_WIDTH, GAME_HEIGHT); // ⬅️ 인자 전달
         }
 
         // 🚨 [핵심 수정] 게임 시작 전 플레이어 강제 이동
-        // 1. 초기 마우스 위치를 플레이어에서 살짝 떨어진 곳으로 설정 (이동 보장)
         mouseX = PLAYER_START_X + 100;
         mouseY = PLAYER_START_Y;
         
-        // 2. move()를 충분히 호출하여 몸통 세그먼트들을 분리
         for(int i = 0; i < playerSize + 5; i++) {
             player.move(mouseX, mouseY);
         }
 
-        // 타이머 시작 (이전과 동일)
         timer = new Timer(16, e -> { 
-            updateGame();
+            gamerunning();
             repaint();
         });
 
@@ -94,10 +96,11 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         javax.swing.SwingUtilities.invokeLater(() -> requestFocusInWindow());
     }
     
-    private void spawnFood() {
+    // 🚨 [수정] spawnFood 메서드: w, h 인자를 받아서 사용
+    private void spawnFood(int w, int h) {
         if (food.size() < MAX_FOOD_COUNT) {
-            int foodX = (int)(Math.random() * getWidth());
-            int foodY = (int)(Math.random() * getHeight());
+            int foodX = (int)(Math.random() * w);
+            int foodY = (int)(Math.random() * h);
             food.add(new Food(foodX, foodY));
         }
     }
@@ -114,10 +117,8 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
     }
 
-    private void updateGame() {
+    private void gamerunning() { 
         // 1. 플레이어 이동
-        // 🚨 [주의] 마우스 위치는 mouseMoved 이벤트에서 실시간으로 업데이트되므로,
-        // (400, 300)에 멈춰있지 않다는 전제하에 계속 움직입니다.
         player.move(mouseX, mouseY);
         
         // 2. 봇 이동
@@ -147,7 +148,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         
         // 4. 먹이 생성
         if (Math.random() < 0.05 && food.size() < MAX_FOOD_COUNT) {
-            spawnFood();
+            spawnFood(getWidth(), getHeight()); 
         }
 
         // 5. 충돌 체크 및 게임 오버
@@ -160,7 +161,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             food.remove(eaten);
         }
         
-        if (Collision.hitWall(player, getWidth(), getHeight()) || Collision.hitSelf(player)) {
+        if (Collision.hitWall(player, getWidth(), getHeight())) {
             isGameOver = true;
         } else if (Collision.hitBots(player, bots)) {
             if (!frame.getHasShield()) {
@@ -175,7 +176,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
     }
     
     // ----------------------------------------------------
-    // 입력 이벤트 처리 (이전과 동일)
+    // 입력 이벤트 처리
     // ----------------------------------------------------
 
     @Override public void keyTyped(KeyEvent e) { }
@@ -209,7 +210,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
     }
 
     // ----------------------------------------------------
-    // 렌더링 (이전과 동일)
+    // 렌더링
     // ----------------------------------------------------
 
     @Override
