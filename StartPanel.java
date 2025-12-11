@@ -37,7 +37,7 @@ public class StartPanel extends JPanel implements ActionListener {
         add(name, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        start.addActionListener(this); 
+        start.addActionListener(this);	
     }
 
     @Override

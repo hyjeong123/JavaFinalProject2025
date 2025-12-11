@@ -51,7 +51,7 @@ public class SettingPanel extends JPanel implements ActionListener {
         quantity.setPaintLabels(true);
         settingsPanel.add(quantity);
 
-        settingsPanel.add(createSpacer(15)); 
+        settingsPanel.add(createSpacer(15));	
 
         secondText = new JLabel("2. Select your initial size (최소 5)");
         secondText.setFont(new Font("맑은 고딕", Font.BOLD, 16));
@@ -70,7 +70,7 @@ public class SettingPanel extends JPanel implements ActionListener {
         JPanel abilityPanel = new JPanel(new GridLayout(1, 2, 10, 0));
         ButtonGroup abilityGroup = new ButtonGroup();
 
-        firstAbility = new JRadioButton("Bullet", true); 
+        firstAbility = new JRadioButton("Bullet", true);	
         secondAbility = new JRadioButton("Shield");
 
         abilityGroup.add(firstAbility);
@@ -95,7 +95,7 @@ public class SettingPanel extends JPanel implements ActionListener {
         secondAbility.addActionListener(this);
         
         // 초기 능력 설정 (기본값: Bullet)
-        frame.setBulletQuantity(10);
+        frame.setBulletQuantity(50);
         frame.setHasShield(false);
     }
 
@@ -123,7 +123,7 @@ public class SettingPanel extends JPanel implements ActionListener {
             int playerSize = 0;
 
             try {
-                playerSize = Integer.parseInt(size.getText().trim()); 
+                playerSize = Integer.parseInt(size.getText().trim());	
                 if (playerSize < 5) {
                     secondText.setText("2. 최소 몸통 길이는 5입니다! (현재: " + playerSize + ")");
                     return;
@@ -133,7 +133,7 @@ public class SettingPanel extends JPanel implements ActionListener {
                 return;
             }
 
-            frame.setWormQuantity(wormQuantity); 
+            frame.setWormQuantity(wormQuantity);	
             frame.setPlayerSize(playerSize);
             
             frame.startGame();

@@ -20,14 +20,14 @@ public class FinPanel extends JPanel implements ActionListener {
         
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         
-        score = new JLabel("게임 종료", SwingConstants.CENTER); 
+        score = new JLabel("게임 종료", SwingConstants.CENTER);	
         score.setFont(new Font("맑은 고딕", Font.BOLD, 30));
-        score.setAlignmentX(CENTER_ALIGNMENT); 
+        score.setAlignmentX(CENTER_ALIGNMENT);	
         add(score);
         
         gostart = new JButton("처음으로");
         gostart.setFont(new Font("맑은 고딕", Font.PLAIN, 20));
-        gostart.setAlignmentX(CENTER_ALIGNMENT); 
+        gostart.setAlignmentX(CENTER_ALIGNMENT);	
         
         add(gostart);
         

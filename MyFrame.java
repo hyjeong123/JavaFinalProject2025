@@ -11,7 +11,7 @@ public class MyFrame extends JFrame {
     private StartPanel startPanel;
     private SettingPanel settingPanel;
     private FinPanel finPanel;
-    private GamePanel currentGamePanel; // 현재 실행 중인 GamePanel 인스턴스
+    private GamePanel currentGamePanel; 
 
     // 설정 값 필드
     private int wormQuantity;
@@ -53,7 +53,7 @@ public class MyFrame extends JFrame {
     public void setPlayerSize(int size) { this.playerSize = size; }
     
     public int getPlayerSpeed() { return playerSpeed; }
-    public void setPlayerSpeed(int speed) { this.playerSpeed = speed; } // 현재는 사용 안 함
+    public void setPlayerSpeed(int speed) { this.playerSpeed = speed; } 
     
     public int getBulletQuantity() { return bulletQuantity; }
     public void setBulletQuantity(int quantity) { this.bulletQuantity = quantity; }
@@ -65,18 +65,20 @@ public class MyFrame extends JFrame {
     public void startGame() {
         // 기존 게임 패널 제거 (메모리 누수 방지)
         if (currentGamePanel != null) {
+            // 게임 루프 정지 및 리소스 정리 (GamePanel에 stopGameLoop() 메서드가 있다고 가정)
+            currentGamePanel.stopGameLoop(); 
             cardPanel.remove(currentGamePanel);
         }
         
-        currentGamePanel = new GamePanel(this); 
-        cardPanel.add(currentGamePanel, "Game"); 
+        currentGamePanel = new GamePanel(this);	
+        cardPanel.add(currentGamePanel, "Game");	
         
         showPanel("Game");
     }
     
     // 게임 종료 및 FinPanel 전환
     public void gameOver(int finalScore) {
-        finPanel.setFinalScore(finalScore); 
+        finPanel.setFinalScore(finalScore);	
         showPanel("Fin");
     }
 }
