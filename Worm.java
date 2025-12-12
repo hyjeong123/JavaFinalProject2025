@@ -18,14 +18,13 @@ public abstract class Worm {
     private double currentAngle = 0; // 뱀의 실제 이동 각도
     private int speed;
     private final List<Circle> body = new ArrayList<>();
-    // private final double DISTANCE_BETWEEN_SEGMENTS = 6.0; // 사용되지 않음
 
     public Worm(int x, int y, int size, int speed) {
         this.x = x;
         this.y = y;
         this.speed = speed;
         for (int i = 0; i < size; i++) {
-            // 초기 몸통 생성 시 좌표를 미세하게 조정하여 뱀처럼 보이게 할 수 있으나, 일단 동일 좌표로 초기화
+            // 초기 몸통 생성
             body.add(new Circle(x, y));
         }
     }
@@ -46,8 +45,7 @@ public abstract class Worm {
         // 3. 머리 추가
         body.add(0, new Circle(newX, newY));
         
-        // 4. 🐍 핵심 수정: 길이가 늘어나지 않도록 이동할 때마다 꼬리를 무조건 제거합니다.
-        // 먹이를 먹었을 때 (increase() 호출)에만 길이가 늘어납니다.
+        // 4. 길이가 늘어나지 않도록 이동할 때마다 꼬리를 무조건 제거합니다.
         if (!body.isEmpty()) {
             body.remove(body.size() - 1);
         }
@@ -64,12 +62,8 @@ public abstract class Worm {
     public double getY() { return y; }
     public List<?> getBody() { return body; }
     
-    // 💡 increase()가 호출되면 move()에서 꼬리 제거를 한 번 건너뛰는 효과가 발생하여 길이가 늘어납니다.
     public void increase() { 
-        // Worm.move()가 한 프레임에 한번 실행될 때, 이 increase()를 호출하면
-        // 다음 move()가 body.remove()를 실행하기 전에 새 세그먼트가 추가되어 길이가 늘어납니다.
-        // 명시적으로 세그먼트를 추가하여 길이를 늘리도록 구현합니다.
-        // body.add(new Circle(x, y)); // 꼬리 위치에 추가하면 렌더링 시 자연스러움
+        // 먹이를 먹었을 때 길이를 1 늘립니다. (꼬리 위치에 새 세그먼트 추가)
         if (!body.isEmpty()) {
              Circle tail = body.get(body.size() - 1);
              body.add(new Circle(tail.getX(), tail.getY()));

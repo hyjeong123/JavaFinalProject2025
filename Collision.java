@@ -107,6 +107,7 @@ public class Collision {
         
         for (BotWorm bw : bots) {
             List<Worm.Circle> body = (List<Worm.Circle>) bw.getBody();
+            // 총알은 머리(0)를 제외한 몸통에 맞아야 함
             if (body.size() <= 1) continue;    
             
             for (int i = 1; i < body.size(); i++) {
@@ -123,31 +124,32 @@ public class Collision {
         return null;
     }
     
+ // Collision.java: checkHitWormWithVolcanoBullet 메서드 (전체 몸통 충돌 체크)
+
     public static Worm checkHitWormWithVolcanoBullet(VolcanoBullet vb, PlayerWorm player, ArrayList<BotWorm> bots) {
         
         double vx = vb.getIntX();
         double vy = vb.getIntY();
         
+        // 충돌 허용 거리 (화산탄 크기 + 지렁이 세그먼트 반지름)의 제곱
         double radiusSq = (vb.getSize() + WORM_SEGMENT_RADIUS) * (vb.getSize() + WORM_SEGMENT_RADIUS);    
 
-        // 1. 플레이어 충돌 체크 (머리만 체크)
-        Worm.Circle playerHead = player.getHead();
-        if (playerHead != null) {
-            double dx = vx - playerHead.getX();
-            double dy = vy - playerHead.getY();
+        // 1. 플레이어 충돌 체크 (모든 몸통 세그먼트 체크)
+        for (Worm.Circle segment : (List<Worm.Circle>) player.getBody()) {
+            double dx = vx - segment.getX();
+            double dy = vy - segment.getY();
             if (dx * dx + dy * dy < radiusSq) {
-                return player;
+                return player; // 몸통에 맞았을 경우 플레이어 반환
             }
         }
         
-        // 2. 봇 충돌 체크 (머리만 체크)
+        // 2. 봇 충돌 체크 (모든 몸통 세그먼트 체크)
         for (BotWorm bw : bots) {
-            Worm.Circle botHead = bw.getHead();
-            if (botHead != null) {
-                double dx = vx - botHead.getX();
-                double dy = vy - botHead.getY();
+            for (Worm.Circle segment : (List<Worm.Circle>) bw.getBody()) {
+                double dx = vx - segment.getX();
+                double dy = vy - segment.getY();
                 if (dx * dx + dy * dy < radiusSq) {
-                    return bw;
+                    return bw; // 몸통에 맞았을 경우 해당 봇 반환
                 }
             }
         }

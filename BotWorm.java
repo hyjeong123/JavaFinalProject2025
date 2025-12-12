@@ -35,7 +35,7 @@ public class BotWorm extends Worm {
             currentTargetY = -1;
         }
 
-        // 2. **[AI 우선순위 1] 벽 회피 로직**
+        // 2. [AI 우선순위 1] 벽 회피 로직
         int SAFE_MARGIN = 50 + WORM_SEGMENT_RADIUS;    
         boolean nearWall = false;
         
@@ -55,7 +55,7 @@ public class BotWorm extends Worm {
             nearWall = true;    
         }
 
-        // 3. **[AI 우선순위 2] 먹이 추적 및 무작위 이동 로직**
+        // 3. [AI 우선순위 2] 먹이 추적 및 무작위 이동 로직
         if (!nearWall && (targetReached || currentTargetX == -1)) {
               Food closestFood = findClosestFood(headX, headY, foodList);
               

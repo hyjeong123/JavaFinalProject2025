@@ -95,7 +95,7 @@ public class SettingPanel extends JPanel implements ActionListener {
         secondAbility.addActionListener(this);
         
         // 초기 능력 설정 (기본값: Bullet)
-        frame.setBulletQuantity(50);
+        frame.setBulletQuantity(10);
         frame.setHasShield(false);
     }
 

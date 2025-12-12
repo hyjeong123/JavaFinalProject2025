@@ -10,7 +10,7 @@ public class Bullet {
 
     private static final double SPEED = 10.0; 
 
-    // 💡 GamePanel에서 요구하는 생성자 (x, y, angle)
+    // GamePanel에서 요구하는 생성자 (x, y, angle)
     public Bullet(double x, double y, double angle) {
         this.x = x;
         this.y = y;
