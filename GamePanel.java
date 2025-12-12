@@ -35,19 +35,19 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
     private int shieldTimer = 0;
     private boolean isShieldAbilitySelected = false;
     private boolean shieldUsed = false; // 💡 쉴드 1회 사용 여부
-    private int bulletCount; 
+    private int bulletCount;    
     
     // ====== [게임 및 충돌 관련 필드] ======
-    private int score = 0;   
+    private int score = 0;    
     private final int MAX_FOOD_COUNT = 50;
     private final int BODIES_TO_FOOD_RATIO = 2;
     
     private int mouseX = 400;
     private int mouseY = 300;
     
-    private double currentAngle = 0; 
-    private final int FORWARD_TARGET_DISTANCE = 300; 
-    private boolean mouseMovedThisFrame = false; 
+    private double currentAngle = 0;    
+    private final int FORWARD_TARGET_DISTANCE = 300;    
+    private boolean mouseMovedThisFrame = false;    
     
     private Timer timer;
 
@@ -60,21 +60,21 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         
         int playerSize = frame.getPlayerSize();
         int quantity = frame.getWormQuantity();
-        bulletCount = frame.getBulletQuantity(); 
+        bulletCount = frame.getBulletQuantity();    
         
         // 능력 선택 로직
         if (frame.getBulletQuantity() == 0 && frame.getHasShield()) {
              isShieldAbilitySelected = true;
         } else {
-             isShieldAbilitySelected = false; 
+             isShieldAbilitySelected = false;    
         }
         
         final int GAME_WIDTH = frame.getWidth();
-        final int GAME_HEIGHT = frame.getHeight(); 
+        final int GAME_HEIGHT = frame.getHeight();    
         
-        final int PLAYER_START_X = GAME_WIDTH / 2; 
-        final int PLAYER_START_Y = GAME_HEIGHT / 2; 
-        final int MIN_SAFE_DISTANCE = 200; 
+        final int PLAYER_START_X = GAME_WIDTH / 2;    
+        final int PLAYER_START_Y = GAME_HEIGHT / 2;    
+        final int MIN_SAFE_DISTANCE = 200;    
         
         // 플레이어 웜 초기화 (기본 속도 5)
         player = new PlayerWorm(PLAYER_START_X, PLAYER_START_Y, playerSize, 5);
@@ -91,7 +91,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             boolean tooClose;
             
             do {
-                botX = (int)(Math.random() * GAME_WIDTH); 
+                botX = (int)(Math.random() * GAME_WIDTH);    
                 botY = (int)(Math.random() * GAME_HEIGHT);
                 
                 double dx = botX - PLAYER_START_X;
@@ -102,7 +102,8 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                 
             } while (tooClose);
             
-            int botsize = (int)(Math.random() * 10) + 1;
+            // 🐛 수정 1: 봇 생성 크기를 5 ~ 8로 변경하여 즉시 사망 버그 방지
+            int botsize = (int)(Math.random() * 4) + 5;
             bots.add(new BotWorm(botX, botY, botsize, 5));
         }
         
@@ -121,7 +122,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         currentAngle = Math.atan2(mouseY - PLAYER_START_Y, mouseX - PLAYER_START_X);
 
 
-        timer = new Timer(16, e -> { 
+        timer = new Timer(16, e -> {    
             gamerunning();
             repaint();
         });
@@ -140,20 +141,22 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         if (food.size() < MAX_FOOD_COUNT) {
             int foodX = (int)(Math.random() * w);
             int foodY = (int)(Math.random() * h);
-            food.add(new Food(foodX, foodY)); 
+            food.add(new Food(foodX, foodY));    
         }
     }
     
     private void killWorm(Worm deadWorm) {
         List<?> body = deadWorm.getBody();
+        // 웜의 몸통을 먹이로 변환
         for (int i = 0; i < body.size(); i += BODIES_TO_FOOD_RATIO) {
             Worm.Circle c = (Worm.Circle) body.get(i);
-            food.add(new Food(c.getIntX(), c.getIntY())); 
+            food.add(new Food(c.getIntX(), c.getIntY()));    
         }
         
         if (deadWorm instanceof BotWorm) {
             bots.remove(deadWorm);
         }
+        // 플레이어는 여기서 제거하지 않음 (게임 오버 로직이 처리)
     }
     
     private void explodeVolcano() {
@@ -161,20 +164,22 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         double y = volcano.getY();
         
         for (int i = 0; i < 8; i++) {
-            double angle = Math.toRadians(i * 45); 
+            double angle = Math.toRadians(i * 45);    
             volcanoBullets.add(new VolcanoBullet(x, y, angle));
         }
     }
 
-    private void gamerunning() { 
+    private void gamerunning() {    
         
         int gameWidth = getWidth();
         int gameHeight = getHeight();
         
-        boolean isGameOver = false; 
+        boolean isGameOver = false;    
         
         Worm.Circle head = player.getHead();
-        if (head == null || player.getSize() <= 0) { 
+        
+        // 🎯 수정 3: 플레이어의 머리가 없거나 길이가 0이면 게임 오버
+        if (head == null || player.getSize() <= 0) {    
             isGameOver = true;
             if (isGameOver) {
                 timer.stop();
@@ -185,7 +190,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
         // 1. 플레이어 이동
         player.move(mouseX, mouseY);
-        currentAngle = player.getCurrentAngle(); 
+        currentAngle = player.getCurrentAngle();    
         
         // 2. 다음 프레임의 목표 설정
         if (mouseMovedThisFrame) {
@@ -203,7 +208,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         
         // 3. 봇 이동
         for (BotWorm bot : bots) {
-            bot.move(player, food, bots, gameWidth, gameHeight); 
+            bot.move(player, food, bots, gameWidth, gameHeight);    
         }
         
         // 4. 쉴드 타이머 관리
@@ -225,13 +230,15 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             VolcanoBullet vb = vbIterator.next();
             vb.move();
 
-            Worm hitWorm = Collision.checkHitWormWithVolcanoBullet(vb, player, bots); 
-            if (hitWorm != null) { 
+            Worm hitWorm = Collision.checkHitWormWithVolcanoBullet(vb, player, bots);    
+            if (hitWorm != null) {    
                 if (hitWorm == player && shieldTimer > 0) {
                      // 쉴드 활성화 시 무시
                 } else {
-                    hitWorm.decrease(5); 	// 화산탄 맞으면 길이 5감소
+                    hitWorm.decrease(5);    // 화산탄 맞으면 길이 5감소
                     vb.setDead();
+                    
+                    // 🎯 수정 4: 화산탄 피격 웜의 사망 조건 (길이가 0 이하일 때)
                     if (hitWorm.getSize() <= 0) {
                         if (hitWorm == player) {
                             isGameOver = true;
@@ -255,11 +262,12 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
             BotWorm hitBot = Collision.checkHitBotWithBullet(b, bots);
             if (hitBot != null) {
-                hitBot.decrease(1);			// 총알 맞으면 길이 1감소 
+                hitBot.decrease(1);            // 총알 맞으면 길이 1감소    
                 b.setDead();
                 
-                if (hitBot.getSize() < 5) {
-                    killWorm(hitBot); 
+                // 🎯 수정 2-1: 총알 맞은 봇의 제거 조건 (길이가 0 이하일 때)
+                if (hitBot.getSize() <= 0) {
+                    killWorm(hitBot);    
                 }
             }
 
@@ -270,18 +278,18 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         
         // 8. 먹이 생성
         if (Math.random() < 0.05 && food.size() < MAX_FOOD_COUNT) {
-            spawnFood(gameWidth, gameHeight); 
+            spawnFood(gameWidth, gameHeight);    
         }
 
         // 9. 충돌 체크 및 게임 오버
         
         if (shieldTimer <= 0) { // 쉴드 비활성화 시에만 충돌 체크
-             // 벽 충돌
+             // 벽 충돌 (길이가 0이 아닐 때만 사망)
              if (Collision.hitWall(player, gameWidth, gameHeight)) {
                  isGameOver = true;
              }
             
-             // 봇 머리에 플레이어 머리 충돌
+             // 봇 머리에 플레이어 머리 충돌 (길이가 0이 아닐 때만 사망)
              if (Collision.hitBots(player, bots)) {
                  isGameOver = true;
              }
@@ -303,8 +311,8 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         Food eatenFood = Collision.checkEatFood(player, food);
         if (eatenFood != null) {
             food.remove(eatenFood);
-            player.increase(); 
-            score += 2;			// 먹이 먹으면 길이 2증가
+            player.increase();    
+            score += 2;            // 먹이 먹으면 길이 2증가
         }
         
         // 봇 먹이 먹기
@@ -316,7 +324,8 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                 food.remove(botEatenFood);
                 bot.increase();
             }
-            if (bot.getSize() < 5) { 
+            // 🎯 수정 2-2: 봇 제거 조건 (길이가 0 이하일 때)
+            if (bot.getSize() <= 0) {    
                 botIterator.remove();
             }
         }
@@ -324,12 +333,12 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         // 💡 봇 제거 시 승리 조건
         if (bots.isEmpty() && !isGameOver) {
             timer.stop();
-            frame.gameOver(score); 
+            frame.gameOver(score);    
             return;
         }
 
         // 최종 게임 오버 (플레이어 사망)
-        if (isGameOver) { 
+        if (isGameOver) {    
             timer.stop();
             frame.gameOver(score);
         }
@@ -357,15 +366,15 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         
         if (keyCode == KeyEvent.VK_SPACE) {
             // Space 키를 누르면 속도 증가
-            player.setSpeed(7); 
+            player.setSpeed(7);    
             
         } else if (keyCode == KeyEvent.VK_D) {
             // D 키는 쉴드 능력 발동
             if (isShieldAbilitySelected) {
                 // 💡 수정: shieldTimer가 0이고, 아직 사용되지 않았을 때만 활성화 (1회 제한)
-                if (shieldTimer <= 0 && !shieldUsed) { 
+                if (shieldTimer <= 0 && !shieldUsed) {    
                     shieldTimer = SHIELD_DURATION_FRAMES;
-                    shieldUsed = true; 
+                    shieldUsed = true;    
                 }
             }
             
@@ -375,7 +384,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                 if (bulletCount > 0) {
                     Worm.Circle head = player.getHead();
                     if (head != null) {
-                        bullets.add(new Bullet(head.getX(), head.getY(), player.getCurrentAngle())); 
+                        bullets.add(new Bullet(head.getX(), head.getY(), player.getCurrentAngle()));    
                         bulletCount--;
                     }
                 }
@@ -405,7 +414,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
         
         // 화산 렌더링
-        g.setColor(new Color(255, 69, 0)); 
+        g.setColor(new Color(255, 69, 0));    
         g.fillOval(volcano.getX() - volcano.getSize(), volcano.getY() - volcano.getSize(), volcano.getSize() * 2, volcano.getSize() * 2);
         
         // 화산탄 렌더링
@@ -414,8 +423,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             g.fillOval(vb.getIntX() - vb.getSize(), vb.getIntY() - vb.getSize(), vb.getSize() * 2, vb.getSize() * 2);
         }
         
-        // 뱀 (봇과 플레이어) 렌더링
-        
+        // 뱀 (봇과 플레이어) 렌더링          
         // 봇 렌더링 (노란색)
         g.setColor(Color.YELLOW);
         for (BotWorm bot : bots) {
@@ -452,7 +460,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         // HUD
         g.setColor(Color.WHITE);
         g.drawString("Score: " + score, 10, 20);
-        g.drawString("Length: " + player.getSize(), 10, 40); 
+        g.drawString("Length: " + player.getSize(), 10, 40);    
         if (!isShieldAbilitySelected) {
              g.drawString("Ability (S: Fire): " + bulletCount + " left", 10, 60);
         } else {
