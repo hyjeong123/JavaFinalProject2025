@@ -17,68 +17,74 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 
+// JPanel을 상속받고 버튼에 관한 이벤트 사용을 위해 ActionListener을 implement하는 StartPanel
 public class StartPanel extends JPanel implements ActionListener {
-
+	// MyFrame, 제목, 버튼을 만들기 위한 참조 선언
     private MyFrame frame;
-    private JLabel name;
+    private JLabel title;
     private JButton start;
     
-    // 1. 이미지 필드 추가
+    // 이미지 파일 불러오기를 위한 객체	
     private Image backgroundImage;
-
+    // ※ 생성자 영역(MyFrame객체를 파라미터로 받음)
     public StartPanel(MyFrame frame) {
-        this.frame = frame;
-        
+        // frame 객체 생성
+    	this.frame = frame;
+    	
+    	// 동서남북+중앙 관리하는 레이아웃관리자
         setLayout(new BorderLayout());
 
-     // StartPanel.java 내의 이미지 로드 부분
+        // 이미지 불러오는 영역
         try {
-            // 💡 수정된 경로: 현재 작업 디렉토리 (Mainprtc) 바로 아래에 SlitherBackground가 있다고 가정
-            java.io.File imageFile = new java.io.File("SlitherBackground/SlitherStartPanel.jpeg");
-            
-            System.out.println("DEBUG: Absolute Path = " + imageFile.getAbsolutePath()); 
-            
-            if (imageFile.exists()) {
-                backgroundImage = ImageIO.read(imageFile);
+        	// 파일을 읽기 위한 클래스 java.io.File에 대한 객체 생성(괄호안은 경로 표시)
+            java.io.File backgroundFile = new java.io.File("SlitherBackground/SlitherStartPanel.jpeg");
+            // 만일 파일이 있다면 파일을 읽어들이고 backgroudImage에 읽어온다 
+            if (backgroundFile.exists()) {
+                backgroundImage = ImageIO.read(backgroundFile);
             } else {
-                throw new java.io.IOException("파일을 찾을 수 없습니다: " + imageFile.getAbsolutePath());
-            }
-        } catch (java.io.IOException e) {
-            e.printStackTrace();
+                throw new java.io.IOException("니 파일 위치: " + backgroundFile.getAbsolutePath());
+            }	// 아니라면 예외처리에 떤져버리고 실제 파일이 있는 위치를 보여줘라
+        } catch (java.io.IOException e) {	
+            e.printStackTrace();	// 오류 내용 출력
             setBackground(Color.LIGHT_GRAY);
-        }
-        name = new JLabel("지렁이 게임", SwingConstants.CENTER);
-        name.setFont(new Font("맑은 고딕", Font.BOLD, 48));
-        name.setForeground(Color.WHITE); // 배경이 어두울 경우 글자색 변경
-
-        start = new JButton("플레이 하기");
-        start.setFont(new Font("맑은 고딕", Font.BOLD, 24));
-        start.setPreferredSize(new Dimension(250, 60));
+        }	// 만약 진짜 exception이 발생한다면 오류 내용 출력하고 배경을 그냥 연한 회색으로 바꾼다
         
+        // 제목 레이블을 CENTER에 놓기 위해 SwingConstants를 이용하여 중앙에 배치함(swing패키지 안에 있음)
+        title = new JLabel("지렁이 게임", SwingConstants.CENTER);
+        title.setFont(new Font("맑은 고딕", Font.BOLD, 48));
+        title.setForeground(Color.YELLOW); // 배경이 어두울 경우 글자색 변경
+        
+        // 시작버튼 설정하기
+        start = new JButton("Play");
+        start.setFont(new Font("맑은 고딕", Font.BOLD, 24));
+        start.setPreferredSize(new Dimension(250, 50));
+        
+        // 시작버튼을 담을 버튼패널 생성(왜 패널 만드냐 --> 버튼은 바로 swingconstants 못하기 때문임 ㅋ
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false); // 버튼 패널 투명하게 설정
         buttonPanel.add(start);
 
-        add(name, BorderLayout.CENTER);
+        add(title, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
         start.addActionListener(this);    
     }
 
-    // 3. paintComponent 오버라이드
+    // paintComponent 영역
     @Override
-    protected void paintComponent(Graphics g) {
-        super.paintComponent(g);
+    public void paintComponent(Graphics g) {
+        super.paintComponent(g);	// 지우개
         if (backgroundImage != null) {
-            // 패널 크기(getWidth(), getHeight())에 맞춰 이미지를 그립니다.
+            // 패널 크기(getWidth(), getHeight())에 맞춰 이미지를 그립니다. (img, x, y, w, h, observer)
             g.drawImage(backgroundImage, 0, 0, getWidth(), getHeight(), this);
         }
     }
-
+    
+    // 버튼의 actionEvent 영역
     @Override
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == start) {
-            frame.showPanel("Setting");
+        if (e.getSource() == start) {	// 버튼 누를시
+            frame.showPanel("Setting"); // frame객체의 showPanel함수를 호출해 SettingPanel로 넘어감
         }
     }
 }

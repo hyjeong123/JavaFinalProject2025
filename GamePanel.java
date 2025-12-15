@@ -131,7 +131,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         javax.swing.SwingUtilities.invokeLater(() -> requestFocusInWindow());
     }
     
-    public void stopGameLoop() {
+    public void gameStop() {
         if (timer != null && timer.isRunning()) {
             timer.stop();
         }
@@ -190,7 +190,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
         // 1. 플레이어 이동
         player.move(mouseX, mouseY);
-        currentAngle = player.getCurrentAngle();    
+        currentAngle = player.getangle();    
         
         // 2. 다음 프레임의 목표 설정
         if (mouseMovedThisFrame) {
@@ -236,7 +236,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                      // 쉴드 활성화 시 무시
                 } else {
                     hitWorm.decrease(5);    // 화산탄 맞으면 길이 5감소
-                    vb.setDead();
+                    vb.bulletDead();
                     
                     // 🎯 수정 4: 화산탄 피격 웜의 사망 조건 (길이가 0 이하일 때)
                     if (hitWorm.getSize() <= 0) {
@@ -249,7 +249,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                 }
             }
 
-            if (!vb.isAlive() || vb.getIntX() < -100 || vb.getIntX() > gameWidth + 100 || vb.getIntY() < -100 || vb.getIntY() > gameHeight + 100) {
+            if (!vb.bulletAlive() || vb.getIntX() < -100 || vb.getIntX() > gameWidth + 100 || vb.getIntY() < -100 || vb.getIntY() > gameHeight + 100) {
                 vbIterator.remove();
             }
         }
@@ -263,7 +263,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             BotWorm hitBot = Collision.checkHitBotWithBullet(b, bots);
             if (hitBot != null) {
                 hitBot.decrease(1);            // 총알 맞으면 길이 1감소    
-                b.setDead();
+                b.bulletDead();
                 
                 // 🎯 수정 2-1: 총알 맞은 봇의 제거 조건 (길이가 0 이하일 때)
                 if (hitBot.getSize() <= 0) {
@@ -271,7 +271,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                 }
             }
 
-            if (b.isOutsideBounds(gameWidth, gameHeight) || !b.isAlive()) {
+            if (b.outofRange(gameWidth, gameHeight) || !b.bulletAlive()) {
                 bulletIterator.remove();
             }
         }
@@ -384,7 +384,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                 if (bulletCount > 0) {
                     Worm.Circle head = player.getHead();
                     if (head != null) {
-                        bullets.add(new Bullet(head.getX(), head.getY(), player.getCurrentAngle()));    
+                        bullets.add(new Bullet(head.getX(), head.getY(), player.getangle()));    
                         bulletCount--;
                     }
                 }

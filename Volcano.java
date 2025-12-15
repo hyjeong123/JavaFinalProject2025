@@ -1,5 +1,6 @@
 package Slither;
 
+// 이것도 그냥 Food클래스랑 다를바가 없다
 public class Volcano {
     private final int x;
     private final int y;
