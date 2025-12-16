@@ -32,7 +32,7 @@ public class Worm {
     private double x, y;	// 지렁이의 x, y좌표
     private double angle = 0; // 지렁이의 각도(초기 설정 = 0)
     private int speed;	// 속도
-    private final List<Circle> body = new ArrayList<>();	// 원에 대한 ArrayList를 body라는 이름의 인스턴스로 생성한다
+    private final List<Circle> body = new ArrayList<>();	// 몸 구성하는 원에 대한 ArrayList를 body라는 이름의 인스턴스로 생성한다
     
     // 생성자 영역, 파라미터는 x, y, size, speed를 나타냄
     public Worm(int x, int y, int size, int speed) {
@@ -61,10 +61,10 @@ public class Worm {
         double new_X = x + Math.cos(angle) * speed;
         double new_Y = y + Math.sin(angle) * speed;
         
-        // 3. 머리 추가
+        // 머리 추가(이동할 방향의 좌표를 보유한 머리)
         body.add(0, new Circle(new_X, new_Y));
         
-        // 4. 길이가 늘어나지 않도록 이동할 때마다 꼬리를 무조건 제거합니다.
+        // 기존의 꼬리를 제거한다(index +1 되면서 자동으로 꼬리 변경)
         if (!body.isEmpty()) {
             body.remove(body.size() - 1);
         }
@@ -107,7 +107,7 @@ public class Worm {
         }
     }
     
-    // 지렁이의 몸통이 감소할 경우의 함수
+    // 지렁이의 몸통이 감소할 경우의 함수(길이만 줄이고 끝)
     public void decrease(int segments) {
     	// 몸 길이만큼 그리되
         for (int i = 0; i < segments; i++) {

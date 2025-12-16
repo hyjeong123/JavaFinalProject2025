@@ -25,29 +25,29 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
     
     // 화산 폭발 관련 변수
     private Volcano volcano;	// 화산 객체(인스턴스 변수)
-    private final ArrayList<VolcanoBullet> volcanoBullets = new ArrayList<>();	// 화산탄 객체 
-    private final int MIN_EXPLOSION_INTERVAL = 60 * 5;  // 최소 5초 (300프레임)
-    private final int MAX_EXPLOSION_INTERVAL = 60 * 15; // 최대 15초 (900프레임)
+    private final ArrayList<VolcanoBullet> volcanoBullets = new ArrayList<>();	// 화산탄 객체
+    
+    private final int FRAME_RATE = 60; // 1000ms / 16ms ≈ 62.5, 약 60프레임으로 가정
+    
     private int volcanoTimer;	// 한번 폭발하고 그 사이의 시간간격을 계산하는 타이머
     
     // 능력 관련 변수 모음
-    private final int SHIELD_DURATION_FRAMES = 180; // 3초
+    private final int SHIELDTIME = 180; // 3초
     private int shieldTimer = 0;	// 방어막 타이머(0으로 초기화)
-    private boolean isShieldAbilitySelected = false;	// 방어막 선택 여부 확인
-    private boolean shieldUsed = false; // 방어막 사용 여부 확인
-    private int bulletCount;	// 총알탄 남은 개수 확인    
+    private boolean shieldselected = false;	// 방어막 선택 여부 확인
+    private boolean shieldused = false; // 방어막 사용 여부 확인
+    private int bulletcount;	// 총알탄 남은 개수 확인    
     
     // 게임관리와 충돌 관련 변수
-    private int score = 0;     // 점수 0으로 초기화	
-    private final int MAX_FOOD_COUNT = 50;	// 맵에 한번에 존재 가능한 먹이의 개수 50으로 설정
-    private final int BODIES_TO_FOOD_RATIO = 2;		// 지렁이가 죽으면 몸통 2개당 먹이 1개로 변환됨
+    private int score = 0;      // 점수 0으로 초기화	
+    private final int FOODMAX = 50;	// 맵에 한번에 존재 가능한 먹이의 개수 50으로 설정
     
     private int mouseX = 400;	// 마우스 x좌표 시작위치(400)
     private int mouseY = 300;	// 마우스 y좌표 시작위치(300)
     
-    private double currentAngle = 0;    // 플레이어 지렁이의 각도 0으로 초기화
-    private final int FORWARD_TARGET_DISTANCE = 300;    // 마우스가 움직이지 않을 때 지렁이가 바라보는 방향으로 설정할 목표 지점까지의 거리
-    private boolean mouseMovedThisFrame = false;    // 현 프레임에서 마우스가 움직였는지 확인하는 변수
+    private double wormangle = 0;    // 플레이어 지렁이의 각도 0으로 초기화
+    private final int MOVINGDISTANCE = 300;    // 마우스가 움직이지 않을 때 지렁이가 바라보는 방향으로 설정할 목표 지점까지의 거리
+    private boolean mousemoved = false;    // 현 프레임에서 마우스가 움직였는지 확인하는 변수
     
     private Timer timer;	// Timer 객체(게임 반복 루프 실행)
     
@@ -60,66 +60,68 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         addMouseMotionListener(this);	// MouseMotionEvent추가
         
         // 지역변수
-        int playerSize = frame.getPlayerSize();		// playersize와 quantity는 MyFrame내 get함수를 가져온다
+        int playersize = frame.getPlayerSize();		// playersize와 quantity는 MyFrame내 get함수를 가져온다
         int quantity = frame.getWormQuantity();		// SettingPanel에서 설정한 값 들고오기 때문
-        bulletCount = frame.getBulletQuantity();    
+        bulletcount = frame.getBulletQuantity();    
         
         // 능력 선택 로직
         if (frame.getBulletQuantity() == 0 && frame.getHasShield()) {
-             isShieldAbilitySelected = true;
+        	shieldselected = true;
         } else {
-             isShieldAbilitySelected = false;    
+        	shieldselected = false;    
         }
         
         // 상수 설정영역
-        final int GAME_WIDTH = frame.getWidth();
-        final int GAME_HEIGHT = frame.getHeight();    
+        final int GAMEWIDTH = frame.getWidth();
+        final int GAMEHEIGHT = frame.getHeight();    
         
-        final int PLAYER_START_X = GAME_WIDTH / 2;    
-        final int PLAYER_START_Y = GAME_HEIGHT / 2;    
-        final int MIN_SAFE_DISTANCE = 200;    
+        final int PLAYER_START_X = GAMEWIDTH / 2;    
+        final int PLAYER_START_Y = GAMEHEIGHT / 2;    
+        final int SAFEDISTANCE = 200;    
         
         // 봇끼리 떨어져야 할 최소 거리
         final int BOT_SAFE_DISTANCE = 50;
         
         // PlayerWorm 초기화 (기본 속도 3)
-        player = new PlayerWorm(PLAYER_START_X, PLAYER_START_Y, playerSize, 3);
+        player = new PlayerWorm(PLAYER_START_X, PLAYER_START_Y, playersize, 3);
         
         // 화산 초기화(맵 중앙영역에 생성)
-        volcano = new Volcano(GAME_WIDTH / 2, GAME_HEIGHT / 2);
+        volcano = new Volcano(GAMEWIDTH / 2, GAMEHEIGHT / 2);
         
-        // 화산 타이머 초기화: 랜덤 값 설정
-        volcanoTimer = (int) (Math.random() * (MAX_EXPLOSION_INTERVAL - MIN_EXPLOSION_INTERVAL)) + MIN_EXPLOSION_INTERVAL;
+        // 화산 타이머 초기화 로직
+        int minFrames = 4 * FRAME_RATE; // 4 * 60 = 240
+        int maxFrames = 6 * FRAME_RATE; // 6 * 60 = 360
+        volcanoTimer = (int) (Math.random() * (maxFrames - minFrames + 1)) + minFrames;
         
         // 봇 초기화영역
         // bot의 개수(quantity만큼 순회함)
         for (int i = 0; i < quantity; i++) {
-            int botX, botY;
+            int botx, boty;
             boolean tooClose;	// 너무 붙으면 서로 죽기 때문에 확인하는 변수
             
             // 지렁이를 생성하라
             do {
             	// 생성될 봇 지렁이들의 x, y좌표 무작위 생성
-                botX = (int)(Math.random() * GAME_WIDTH);    
-                botY = (int)(Math.random() * GAME_HEIGHT);	
+            	botx = (int)(Math.random() * GAMEWIDTH);    
+            	boty = (int)(Math.random() * GAMEHEIGHT);	
                 
-                // 1. 플레이어와의 거리 확인
-                double dx_player = botX - PLAYER_START_X;
-                double dy_player = botY - PLAYER_START_Y;
-                double dist_player_sq = dx_player * dx_player + dy_player * dy_player;
+                //  플레이어와의 거리 확인
+                double dx_player = botx - PLAYER_START_X;
+                double dy_player = boty - PLAYER_START_Y;
+                double botplayerdis = (dx_player * dx_player) + (dy_player * dy_player);
                 
-                tooClose = dist_player_sq < (MIN_SAFE_DISTANCE * MIN_SAFE_DISTANCE);
+                tooClose = botplayerdis < (SAFEDISTANCE * SAFEDISTANCE);
                 
-                // 2. **추가: 기존 봇들과의 거리 확인**
+                // 기존 봇들과의 거리 확인**
                 if (!tooClose) {
-                    for (BotWorm existingBot : bots) {
-                        double dx_bot = botX - existingBot.getHead().getX();
-                        double dy_bot = botY - existingBot.getHead().getY();
-                        double dist_bot_sq = dx_bot * dx_bot + dy_bot * dy_bot;
+                    for (BotWorm panelbot : bots) {
+                        double dx_bot = botx - panelbot.getHead().getX();
+                        double dy_bot = boty - panelbot.getHead().getY();
+                        double botbotdis = (dx_bot * dx_bot) + (dy_bot * dy_bot);
 
-                        if (dist_bot_sq < (BOT_SAFE_DISTANCE * BOT_SAFE_DISTANCE)) {
+                        if (botbotdis < (BOT_SAFE_DISTANCE * BOT_SAFE_DISTANCE)) {
                             tooClose = true;
-                            break; 
+                            break;	
                         }
                     }
                 }
@@ -128,12 +130,12 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             
             // 봇 생성 크기를 5 ~ 8로 설정(그 이상이면 생성하면서 지렁이의 머리와 몸통에 부딪혀 시작전부터 사망하는 불상사 방지)
             int botsize = (int)(Math.random() * 4) + 5;
-            bots.add(new BotWorm(botX, botY, botsize, 3));	// BotWorm 추가(스피드 3)
+            bots.add(new BotWorm(botx, boty, botsize, 3));	// BotWorm 추가(스피드 3)
         }
         
         // Food 초기화(50개 생성)
-        for (int i = 0; i < MAX_FOOD_COUNT; i++) {
-            spawnFood(GAME_WIDTH, GAME_HEIGHT);
+        for (int i = 0; i < FOODMAX; i++) {
+            spawnFood(GAMEWIDTH, GAMEHEIGHT);
         }
         
         // 실제 마우스 위치를 조금 더 옮김(그래야 처음 마우스를 가만히 뒀을때 델타값이 있어서 방향 계산 가능)
@@ -141,12 +143,12 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         mouseY = PLAYER_START_Y;
         
         // 플레이어지렁이가 playerSize만큼 초기 몸통길이를 부여하고 이를 움직이게하기 위해 move호출을 계속한다
-        for(int i = 0; i < playerSize; i++) {
+        for(int i = 0; i < playersize; i++) {
             player.move(mouseX, mouseY);
         }
         
         // 플레이어지렁이의 방향을 계산할 각도 구하기(아크 탄젠트 2)
-        currentAngle = Math.atan2(mouseY - PLAYER_START_Y, mouseX - PLAYER_START_X);
+        wormangle = Math.atan2(mouseY - PLAYER_START_Y, mouseX - PLAYER_START_X);
 
         // Timer은 16ms의 단위로 running한다 Timer내에는 게임 전체관리하는 함수랑 다시 그리는 함수 두가지가 존재
         timer = new Timer(16, e -> {    
@@ -169,7 +171,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
     
     // 먹이 생성함수(먹이개수가 50개보다 적으면 Frame에 랜덤하게 생성)
     private void spawnFood(int w, int h) {
-        if (food.size() < MAX_FOOD_COUNT) {
+        if (food.size() < FOODMAX) {
             int foodX = (int)(Math.random() * w);
             int foodY = (int)(Math.random() * h);
             food.add(new Food(foodX, foodY));    
@@ -180,7 +182,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
     private void killWorm(Worm deadWorm) {
         List<?> body = deadWorm.getBody();	// 죽은 지렁이의 몸통을 가져와 body에 저장한다
         // 웜의 몸통을 먹이로 변환
-        for (int i = 0; i < body.size(); i += BODIES_TO_FOOD_RATIO) {
+        for (int i = 0; i < body.size(); i += 2) { // 💡 수정: 몸통 2개당 먹이 1개 생성 (i += 2)
             Worm.Circle c = (Worm.Circle) body.get(i);		// body의 클래스마다 Worm.Circle로 강제 형변환을 한다
             food.add(new Food(c.getIntX(), c.getIntY()));    // 죽은 지렁이 원의 좌표마다 food를 생성    
         }
@@ -211,18 +213,18 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         int gameWidth = getWidth();
         int gameHeight = getHeight();
         
-        boolean isGameOver = false;		// 게임오버가 되었는지 확인(false로 초기화)
+        boolean gameover = false;		// 게임오버가 되었는지 확인(false로 초기화)
         
         Worm.Circle head = player.getHead();	// player 객체의 머리를 들고옴
         
         // 플레이어의 머리가 없거나 길이가 0이면 게임 오버
         if (head == null || player.getSize() <= 0) {    
-            isGameOver = true;
-            if (isGameOver) {
+        	gameover = true;
+            if (gameover) {
                 timer.stop();
                 if (player.getSize() > 0) {			// if 몸길이가 남아있다면 점수는 몸길이
                     score = player.getSize();
-                } 
+                }	
                 else {							// 만약 죽어서 게임 끝나면 점수는 0점
                     score = 0;
                 }
@@ -233,20 +235,20 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
         // 플레이어 이동
         player.move(mouseX, mouseY);
-        currentAngle = player.getangle();    // Player의 각도를 조정한다
+        wormangle = player.getangle();    // Player의 각도를 조정한다
         
         // 다음 프레임의 목표 설정
-        if (mouseMovedThisFrame) {
-            double dx = mouseX - head.getX();	// 마우스와 player지렁이의 x, y의 변화량을 구해서 
+        if (mousemoved) {
+            double dx = mouseX - head.getX();	// 마우스와 player지렁이의 x, y의 변화량을 구해서
             double dy = mouseY - head.getY();	// 각도를 계산한다
             if (dx * dx + dy * dy > 1) {		// 움직임이 있다면 각도를 계산한다
-                currentAngle = Math.atan2(dy, dx);
+            	wormangle = Math.atan2(dy, dx);
             }
         } else {	// 움직임이 없다면 기존 각도로 구해진 방향으로 300 이동하라
-            mouseX = (int)(head.getX() + Math.cos(currentAngle) * FORWARD_TARGET_DISTANCE);
-            mouseY = (int)(head.getY() + Math.sin(currentAngle) * FORWARD_TARGET_DISTANCE);
+            mouseX = (int)(head.getX() + Math.cos(wormangle) * MOVINGDISTANCE);
+            mouseY = (int)(head.getY() + Math.sin(wormangle) * MOVINGDISTANCE);
         }
-        mouseMovedThisFrame = false;	// 머리 움직이지 않았다고 함
+        mousemoved = false;	// 머리 움직이지 않았다고 함
 
         
         // 봇 이동(초기화)
@@ -263,8 +265,10 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         volcanoTimer--;	// 한번 터지면 1씩 줄어듦
         if (volcanoTimer <= 0) {
             explodeVolcano();
-            // 💡 다음 타이머를 랜덤 값으로 재설정
-            volcanoTimer = (int) (Math.random() * (MAX_EXPLOSION_INTERVAL - MIN_EXPLOSION_INTERVAL)) + MIN_EXPLOSION_INTERVAL;
+            // 💡 수정: 다음 타이머를 4~6초 랜덤 값으로 재설정 (하드코딩된 값 사용)
+            int minFrames = 4 * FRAME_RATE; 
+            int maxFrames = 6 * FRAME_RATE;
+            volcanoTimer = (int) (Math.random() * (maxFrames - minFrames + 1)) + minFrames;
         }
 
         // 화산탄 이동 및 지렁이와의 충돌 체크(화산탄을 순차적으로 확인하기 위해 Iterator사용)
@@ -276,7 +280,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             Worm hitWorm = Collision.checkHitWormWithVolcanoBullet(vb, player, bots);    // Worm이 플레이어 혹은 봇 지렁이와 부딪히는지 확인
             if (hitWorm != null) {    // 만약 지렁이가 부딪혔다면 진행할 조건문
                 if (hitWorm == player && shieldTimer > 0) {		// 쉴드 활성화 되었을 때 무시
-   
+    
                 } else {
                     hitWorm.decrease(5);    // 화산탄 맞으면 길이 5감소
                     vb.bulletDead();		// 화산탄 삭제(VolcanoBullet내의 함수 가져옴)
@@ -284,7 +288,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
                     // 화산탄 피격 웜의 사망 조건 (길이가 0 이하일 때)
                     if (hitWorm.getSize() <= 0) {
                         if (hitWorm == player) {
-                            isGameOver = true;	// 피격당했는데 player몸길이가 0되면 게임 끝
+                        	gameover = true;	// 피격당했는데 player몸길이가 0되면 게임 끝
                         } else {
                             killWorm(hitWorm);	// 맞은 지렁이가 playerWorm이 아니라면 지렁이 없앰
                         }
@@ -306,8 +310,8 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 
             BotWorm hitBot = Collision.checkHitBotWithBullet(b, bots);
             if (hitBot != null) {
-                hitBot.decrease(1);      // 총알 맞으면 길이 1감소    
-                b.bulletDead();			 // 총알 없애기
+                hitBot.decrease(1);    	// 총알 맞으면 길이 1감소    
+                b.bulletDead();			// 총알 없애기
                 
                 // 총알 맞은 봇의 제거 조건 (길이가 0 이하일 때)
                 if (hitBot.getSize() <= 0) {
@@ -321,7 +325,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
         
         // 먹이 생성
-        if (Math.random() < 0.05 && food.size() < MAX_FOOD_COUNT) {
+        if (Math.random() < 0.05 && food.size() < FOODMAX) {
             spawnFood(gameWidth, gameHeight);    
         }
 
@@ -329,12 +333,12 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         if (shieldTimer <= 0) { // 쉴드 비활성화 시에만 충돌 체크
              // 벽 충돌 (길이가 0이 아닐 때만 사망)
              if (Collision.hitWall(player, gameWidth, gameHeight)) {
-                 isGameOver = true;
+            	 gameover = true;
              }
             
              // 봇 몸통에 플레이어 머리 충돌 (길이가 0이 아닐 때만 사망)
              if (Collision.hitBots(player, bots)) {
-                 isGameOver = true;
+            	 gameover = true;
              }
         }
 
@@ -352,9 +356,9 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
         
         // PlayerWorm의 먹이 먹기
-        Food eatenFood = Collision.checkEatFood(player, food);	// 플레이어와 먹이의 충돌
-        if (eatenFood != null) {		// 만약 먹었다면
-            food.remove(eatenFood);		// 먹은 음식을 없애고
+        Food eatFood = Collision.checkEatFood(player, food);	// 플레이어와 먹이의 충돌
+        if (eatFood != null) {		// 만약 먹었다면
+            food.remove(eatFood);		// 먹은 음식을 없애고
             player.increase();    		// 플레이어 지렁이의 몸 길이 증가 
             score = player.getSize(); 	// 점수를 현재 플레이어 길이로 설정합니다.
         }
@@ -363,9 +367,9 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         Iterator<BotWorm> botIterator = bots.iterator();
         while(botIterator.hasNext()) {		// 저장된 모든 지렁이를 순회
             BotWorm bot = botIterator.next();	
-            Food botEatenFood = Collision.checkEatFood(bot, food);	// 먹었는지 체크
-            if (botEatenFood != null) {		// 만약 먹었다면
-                food.remove(botEatenFood);	// 먹이 삭제
+            Food botEatFood = Collision.checkEatFood(bot, food);	// 먹었는지 체크
+            if (botEatFood != null) {		// 만약 먹었다면
+                food.remove(botEatFood);	// 먹이 삭제
                 bot.increase();				// 봇 지렁이 몸길이 증가
             }
             // 봇 사망
@@ -375,7 +379,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
 
         // 모든 BotWorm 제거 시 승리 
-        if (bots.isEmpty() && !isGameOver) {
+        if (bots.isEmpty() && !gameover) {
             timer.stop();
             score = player.getSize(); // 최종 점수를 길이로 확정
             frame.gameOver(score);    
@@ -383,7 +387,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
 
         // 최종 게임 오버 (플레이어 사망)
-        if (isGameOver) {    
+        if (gameover) {    
             timer.stop();	// 타이머 정지
             if (player.getSize() > 0) {
                 score = player.getSize();
@@ -408,7 +412,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
 		// 커서 x, y좌표 가져오고 프레임 움직임을 true로 바꿈
 		mouseX = e.getX();
 		mouseY = e.getY();
-		mouseMovedThisFrame = true;
+		mousemoved = true;
 	}
 	
 	// KeyEvent영역
@@ -428,23 +432,23 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         }
         // D키 눌릴때 방어막 활성화
         else if (keyCode == KeyEvent.VK_D) {
-            if (isShieldAbilitySelected) {
+            if (shieldselected) {
                 // shieldTimer가 0이고, 아직 사용되지 않았을 때만 활성화 (1회 제한)
-                if (shieldTimer <= 0 && !shieldUsed) {    
-                    shieldTimer = SHIELD_DURATION_FRAMES;
-                    shieldUsed = true;    
+                if (shieldTimer <= 0 && !shieldused) {    
+                    shieldTimer = SHIELDTIME;
+                    shieldused = true;    
                 }
             }
             
-        } 
+        }
         // S키 눌릴때 총알 발사
         else if (keyCode == KeyEvent.VK_S) {
-            if (!isShieldAbilitySelected) {
-                if (bulletCount > 0) {
+            if (!shieldselected) {
+                if (bulletcount > 0) {
                     Worm.Circle head = player.getHead();	// 머리가 향하는 방향으로 쏠거기 때문에 머리 가져옴
                     if (head != null) {
                         bullets.add(new Bullet(head.getX(), head.getY(), player.getangle()));    
-                        bulletCount--;	// 한 발 쏘면 감소
+                        bulletcount--;	// 한 발 쏘면 감소
                     }
                 }
             }
@@ -525,7 +529,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             }
         }
 
-        // 총알 렌더링
+        // 총알 그리기
         g.setColor(Color.CYAN);
         for (Bullet b : bullets) {
             g.fillOval(b.getIntX() - b.getSize(), b.getIntY() - b.getSize(), b.getSize() * 2, b.getSize() * 2);
@@ -536,18 +540,18 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         g.setColor(Color.WHITE);
         g.drawString("몸길이: " + player.getSize(), 10, 40);    
         
-        String abilityStatus;
-        if (isShieldAbilitySelected) {
+        String abilityleft;
+        if (shieldselected) {
             if (shieldTimer > 0) {
-                abilityStatus = (shieldTimer / 60 + 1) + "s";
-            } else if (shieldUsed) {
-                abilityStatus = "사용불가";
+            	abilityleft = (shieldTimer / 60 + 1) + "s";
+            } else if (shieldused) {
+            	abilityleft = "사용불가";
             } else {
-                abilityStatus = "사용가능";
+            	abilityleft = "사용가능";
             }
-            g.drawString("방어막(D키): " + abilityStatus, 10, 60);
+            g.drawString("방어막(D키): " + abilityleft, 10, 60);	// (문자열, x, y) 위치
         } else {
-             g.drawString("총알(S키): " + bulletCount + "발 남음", 10, 60);
+             g.drawString("총알(S키): " + bulletcount + "발 남음", 10, 60);
         }
     }
 }
