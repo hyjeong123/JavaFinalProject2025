@@ -43,7 +43,7 @@ public class FinPanel extends JPanel implements ActionListener {
         add(Box.createVerticalStrut(30)); // 높이 30 픽셀의 여백 추가
         
         // 5. 점수 레이블
-        score = new JLabel("최종 점수: 0 점", SwingConstants.CENTER); // 초기 텍스트 수정
+        score = new JLabel("몸 길이: 0 ", SwingConstants.CENTER); // 초기 텍스트 수정
         score.setFont(new Font("맑은 고딕", Font.BOLD, 36)); // 점수 폰트 크기 키우기
         score.setForeground(Color.WHITE); // 흰색 글씨
         score.setAlignmentX(CENTER_ALIGNMENT);
@@ -67,7 +67,7 @@ public class FinPanel extends JPanel implements ActionListener {
     }
     
     public void setFinalScore(int finalScore) {
-        score.setText("최종 점수: " + finalScore + " 점");
+        score.setText("최종 몸길이: " + finalScore + "");
     }
     
     @Override

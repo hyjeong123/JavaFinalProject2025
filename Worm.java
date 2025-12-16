@@ -54,7 +54,7 @@ public class Worm {
         
         // 이동거리가 1이상 되었을때 계산하라
         if (dx * dx + dy * dy > 1) { 
-            angle = Math.atan2(dy, dx); 	// 각도를 아크탄젠트로 구한다
+            angle = Math.atan2(dy, dx); 	// 각도를 아크탄젠트2로 구한다
         }
 
         // 새로운 머리 위치 계산

@@ -11,7 +11,7 @@ public class BotWorm extends Worm {
     private final int TARGET_DISTANCE = 100;	// 목표지점까지의 거리 제곱의 값을 100으로 지정, 100보다 작으면 목표에 도달했다고 여김
     
     private final int SPEED;	// 기본 속도 저장(5)
-    private static final int BOOSTSPEED = 7; // 부스트 시 속도(7)
+    private static final int BOOSTSPEED = 5; // 부스트 시 속도(7)
     private static final int BOOSTDURATION = 180; // 부스트 지속 시간 3초
     private int boosttimer = 0; // 남은 부스트 시간 카운터
     
