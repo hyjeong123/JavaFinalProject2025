@@ -5,17 +5,19 @@ import java.util.List;
 
 public class Collision {
     // 전역변수 영역
+	// 원 모양 객체의 반지름
     private static final int WORMRADIUS = 6;
     private static final int FOODRADIUS = 8;
     private static final int BULLETRADIUS = 3;
     
+    // 객체 사이의 거리
     private static final double WORMWORM = (WORMRADIUS * 2) * (WORMRADIUS * 2); 	// (반지름 + 반지름)의 제곱으로 거리 구하기
     private static final double WORMFOOD = (WORMRADIUS + FOODRADIUS) * (WORMRADIUS + FOODRADIUS);
     private static final double WORMBULLET = (BULLETRADIUS + WORMRADIUS) * (BULLETRADIUS + WORMRADIUS); 
     // ※ 메소드 중 앞의 클래스명이 붙은 메소드들은 클래스로 만들어진 인스턴스를 반환하는 함수들이다
    
     // 먹이 섭취 함수 (파라미터 지렁이 객체, 먹이 객체)
-    public static Food checkEatFood(Worm worm, ArrayList<Food> foods) {
+    public static Food wormvsfood(Worm worm, ArrayList<Food> foods) {
         Worm.Circle head = worm.getHead();	// 지렁이의 머리부분을 가져온다(머리로 먹이를 먹기 때문) 
         if (head == null) return null;
         
@@ -36,7 +38,7 @@ public class Collision {
     
     // 지렁이와 플레이어의 부딪힘 확인을 하는 boolean형 함수(파라미터 플레이어 객체, width, height)
     // 이때 Worm객체가 아니라 PlayerWorm객체인 이유는 BotWorm은 벽에 부딪히지 않도록 했기 때문
-    public static boolean hitWall(PlayerWorm player, int w, int h) {
+    public static boolean playervswall(PlayerWorm player, int w, int h) {
         Worm.Circle head = player.getHead();	// player의 머리 들고옴
         if (head == null) { 
         	return false;
@@ -47,7 +49,7 @@ public class Collision {
     }
     
     // 플레이어의 머리와 봇 지렁이들의 몸통이 충돌했는지 확인하는 함수(파라미터 플레이어 객체, 봇 지렁이 객체)
-    public static boolean hitBots(PlayerWorm player, ArrayList<BotWorm> bots) {
+    public static boolean playerhitbotbody(PlayerWorm player, ArrayList<BotWorm> bots) {
     	Worm.Circle head = player.getHead();	// player의 머리 들고옴
         if (head == null) {
         	return false;
@@ -68,7 +70,7 @@ public class Collision {
     }
     
     // BotWorm이 PlayerWorm에 부딪힐 경우를 확인하는 함수(파라미터 PlayerWorm 객체 BotWorm 객체)
-    public static BotWorm checkBotHitPlayerBody(PlayerWorm player, ArrayList<BotWorm> bots) {        
+    public static BotWorm bothitplayerbody(PlayerWorm player, ArrayList<BotWorm> bots) {        
     	List<Worm.Circle> playerBody = (List<Worm.Circle>) player.getBody();	// Worm.Circle타입의 객체를 담는 List, player의 몸통을 index순으로 반환한걸 저장
    
     	if (playerBody.size() <= 1) {	// 몸 길이가 1 이하(사망)
@@ -95,7 +97,7 @@ public class Collision {
     }
     
     // 봇과 봇이 충돌하는 함수(파라미터 bot 객체)
-    public static BotWorm checkBotHitBot(ArrayList<BotWorm> bots) {
+    public static BotWorm bothitbotbody(ArrayList<BotWorm> bots) {
         for (int i = 0; i < bots.size(); i++) {		// 생성된 BotWorm의 개수만큼 순회
             BotWorm currentBot = bots.get(i);		// 하나의 bot을 가져와 확인할 예정
             Worm.Circle head = currentBot.getHead();	// 가져온 bot의 머리를 가져옴
@@ -125,7 +127,7 @@ public class Collision {
     }
     
     // BotWorm과 Bullet이 충돌했음을 알려주는 함수
-    public static BotWorm checkHitBotWithBullet(Bullet bullet, ArrayList<BotWorm> bots) {
+    public static BotWorm wormhitbullet(Bullet bullet, ArrayList<BotWorm> bots) {
         // 생성된 BotWorm의 객체 bots 수만큼 순회
         for (BotWorm bw : bots) {
             List<Worm.Circle> body = (List<Worm.Circle>) bw.getBody();
@@ -149,7 +151,7 @@ public class Collision {
     }
     
  // BotWorm과 PlayerWorm의 화산탄 피격확인 메소드(파라미터 화산탄, 플레이어, 봇)
-    public static Worm checkHitWormWithVolcanoBullet(VolcanoBullet vb, PlayerWorm player, ArrayList<BotWorm> bots) {
+    public static Worm wormhitVolcanoBullet(VolcanoBullet vb, PlayerWorm player, ArrayList<BotWorm> bots) {
         // 화산탄의 x, y좌표 가져옴
         double vx = vb.getIntX();
         double vy = vb.getIntY();

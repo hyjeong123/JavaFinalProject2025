@@ -278,7 +278,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             VolcanoBullet vb = vbIterator.next();
             vb.move();		// 화산탄을 움직인다
 
-            Worm hitWorm = Collision.checkHitWormWithVolcanoBullet(vb, player, bots);    // Worm이 플레이어 혹은 봇 지렁이와 부딪히는지 확인
+            Worm hitWorm = Collision.wormhitVolcanoBullet(vb, player, bots);    // Worm이 플레이어 혹은 봇 지렁이와 부딪히는지 확인
             if (hitWorm != null) {    // 만약 지렁이가 부딪혔다면 진행할 조건문
                 if (hitWorm == player && shieldTimer > 0) {		// 쉴드 활성화 되었을 때 무시
     
@@ -309,7 +309,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
             Bullet b = bulletIterator.next();
             b.move();
 
-            BotWorm hitBot = Collision.checkHitBotWithBullet(b, bots);
+            BotWorm hitBot = Collision.wormhitbullet(b, bots);
             if (hitBot != null) {
                 hitBot.decrease(1);    	// 총알 맞으면 길이 1감소    
                 b.bulletDead();			// 총알 없애기
@@ -333,31 +333,31 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         // PlayerWorm 충돌 체크 및 게임 오버        
         if (shieldTimer <= 0) { // 쉴드 비활성화 시에만 충돌 체크
              // 벽 충돌 (길이가 0이 아닐 때만 사망)
-             if (Collision.hitWall(player, gameWidth, gameHeight)) {
+             if (Collision.playervswall(player, gameWidth, gameHeight)) {
             	 gameover = true;
              }
             
              // 봇 몸통에 플레이어 머리 충돌 (길이가 0이 아닐 때만 사망)
-             if (Collision.hitBots(player, bots)) {
+             if (Collision.playerhitbotbody(player, bots)) {
             	 gameover = true;
              }
         }
 
 
         // 플레이어 몸통 vs 봇의 머리(피해자)
-        BotWorm hitBotByPlayer = Collision.checkBotHitPlayerBody(player, bots);
+        BotWorm hitBotByPlayer = Collision.bothitplayerbody(player, bots);
         if (hitBotByPlayer != null) {
             killWorm(hitBotByPlayer);
         }
         
         // 봇의 몸통 vs 봇의 머리(피해자)
-        BotWorm hitBotByBot = Collision.checkBotHitBot(bots);
+        BotWorm hitBotByBot = Collision.bothitbotbody(bots);
         if (hitBotByBot != null) {
             killWorm(hitBotByBot);
         }
         
         // PlayerWorm의 먹이 먹기
-        Food eatFood = Collision.checkEatFood(player, food);	// 플레이어와 먹이의 충돌
+        Food eatFood = Collision.wormvsfood(player, food);	// 플레이어와 먹이의 충돌
         if (eatFood != null) {		// 만약 먹었다면
             food.remove(eatFood);		// 먹은 음식을 없애고
             player.increase();    		// 플레이어 지렁이의 몸 길이 증가 
@@ -368,7 +368,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         Iterator<BotWorm> botIterator = bots.iterator();
         while(botIterator.hasNext()) {		// 저장된 모든 지렁이를 순회
             BotWorm bot = botIterator.next();	
-            Food botEatFood = Collision.checkEatFood(bot, food);	// 먹었는지 체크
+            Food botEatFood = Collision.wormvsfood(bot, food);	// 먹었는지 체크
             if (botEatFood != null) {		// 만약 먹었다면
                 food.remove(botEatFood);	// 먹이 삭제
                 bot.increase();				// 봇 지렁이 몸길이 증가
