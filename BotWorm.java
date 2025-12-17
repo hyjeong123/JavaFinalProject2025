@@ -115,10 +115,10 @@ public class BotWorm extends Worm {
     // 참고: 이 로직은 봇의 현재 머리가 아닌 target_x, target_y를 기준으로 탐색합니다.
     private Food findClosestFood(int target_x, int target_y, ArrayList<Food> foods) {
         
-        // ⭐ 추가: 봇의 시야 범위 (예: 250px. 250*250 = 62500)
-        final double SIGHT_RANGE_SQR = 62500.0;
+        // 봇의 시야 범위 (250px. 250*250 = 62500)
+        final double BOTSIGHT = 62500.0;
         
-        // ⭐ 추가: 시야 내의 먹이를 저장할 리스트
+        // 시야 내의 먹이를 저장할 리스트
         ArrayList<Food> visibleFoods = new ArrayList<>();
         
         Food closest = null;	// 가장 가까운 먹이가 없음
@@ -129,27 +129,24 @@ public class BotWorm extends Worm {
             double dy = f.getY() - target_y;	// 먹이의 x좌표와 목표지점 y좌표의 변화량을 구한다
             double fooddistance = dx * dx + dy * dy;	// 먹이의 거리 제곱 구함(유클리드 거리 공식)
 
-            // ⭐ 추가 로직 1: 시야 범위 내에 들어온 먹이만 따로 리스트에 수집
-            if (fooddistance < SIGHT_RANGE_SQR) {
+            // 시야 범위 내에 들어온 먹이만 따로 리스트에 수집
+            if (fooddistance < BOTSIGHT) {
                  visibleFoods.add(f);
             }
             
-            // ⭐ 기존 로직 (가장 가까운 먹이를 찾던 로직) 
+            // 가장 가까운 먹이를 찾는 로직)
             if (fooddistance < mindistance) {	// 만약 먹이의 거리가 최소 거리보다 작으면 업데이트
                 mindistance = fooddistance;
                 closest = f;	// 가장 가까운 먹이의 Food인스턴스를 f로 설정함
             }
         }
         
-        // ----------------------------------------------------
-        // ⭐ 추가 로직 2: 충돌 방지 핵심 로직 (시야 내의 먹이 중 무작위 선택)
-        // ----------------------------------------------------
-        
+        // 충돌 방지 핵심 로직 (시야 내의 먹이 중 무작위 선택)      
         if (visibleFoods.isEmpty()) {
-            // 시야 내에 먹이가 없다면, 기존처럼 (가장 가까웠던, 아마도 멀리 있는) 먹이를 반환합니다.
+            // 시야 내에 먹이가 없다면, 기존처럼 (가장 가까웠던, 아마도 멀리 있는) 먹이를 반환한다
             return closest;
         } else {
-            // ⭐ 시야 내에 먹이가 있다면, 그 먹이들 중 무작위로 하나를 선택하여 반환합니다.
+            // 시야 내에 먹이가 있다면, 그 먹이들 중 무작위로 하나를 선택하여 반환한다
             int randomIndex = (int) (Math.random() * visibleFoods.size());
             return visibleFoods.get(randomIndex);
         }

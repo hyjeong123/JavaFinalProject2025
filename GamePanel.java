@@ -151,6 +151,7 @@ public class GamePanel extends JPanel implements KeyListener, MouseMotionListene
         wormangle = Math.atan2(mouseY - PLAYER_START_Y, mouseX - PLAYER_START_X);
 
         // Timer은 16ms의 단위로 running한다 Timer내에는 게임 전체관리하는 함수랑 다시 그리는 함수 두가지가 존재
+        // 1000ms / 16ms = 62.5 62.5FPS
         timer = new Timer(16, e -> {    
             gamerunning();
             repaint();
