@@ -77,7 +77,7 @@ public class SettingPanel extends JPanel implements ActionListener {
         settingsPanel.add(createSpace(15));
         
         // 세번째 설정, 플레이어 지렁이의 능력 하나 선택
-        thirdText = new JLabel("3. Choose your abilities (택 1)");
+        thirdText = new JLabel("3. 능력을 선택하시오 (택 1)");
         thirdText.setFont(new Font("맑은 고딕", Font.BOLD, 16));
         settingsPanel.add(thirdText);
         

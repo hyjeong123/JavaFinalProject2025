@@ -58,7 +58,7 @@ public class Worm {
         }
 
         // 새로운 머리 위치 계산
-        double new_X = x + Math.cos(angle) * speed;
+        double new_X = x + Math.cos(angle) * speed;    // cos함수와 sin함수는 -1 부터 1 사이라서 그쪽 방향으로 간다
         double new_Y = y + Math.sin(angle) * speed;
         
         // 머리 추가(이동할 방향의 좌표를 보유한 머리)

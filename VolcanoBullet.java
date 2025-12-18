@@ -9,7 +9,7 @@ public class VolcanoBullet {
     private final int size = 5;
     private boolean volcanobulletalive = true;
     // 화산탄 고정 이동속도 5
-    private static final double SPEED = 5.0; 
+    private static final double SPEED = 7.0; 
     // 생성자 영역 (파라미터 x, y, 각도)
     public VolcanoBullet(double x, double y, double angle) {
         this.x = x;

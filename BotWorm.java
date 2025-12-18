@@ -10,8 +10,8 @@ public class BotWorm extends Worm {
     private final int RADIUS = 6;    // 지렁이 몸통을 이루는 원 하나의 반지름 = 6
     private final int TARGET_DISTANCE = 100;	// 목표지점까지의 거리 제곱의 값을 100으로 지정, 100보다 작으면 목표에 도달했다고 여김
     
-    private final int SPEED;	// 기본 속도 저장(5)
-    private static final int BOOSTSPEED = 5; // 부스트 시 속도(7)
+    private final int SPEED;	// 기본 속도 저장(3)
+    private static final int BOOSTSPEED = 5; // 부스트 시 속도(5)
     private static final int BOOSTDURATION = 180; // 부스트 지속 시간 3초
     private int boosttimer = 0; // 남은 부스트 시간 카운터
     
@@ -63,7 +63,7 @@ public class BotWorm extends Worm {
         // 점과 점 사이의 거리 공식을 이용해 목표 거리보다 작으면 도달했다고 판단
         if (dx * dx + dy * dy < TARGET_DISTANCE) {
             targetreached = true;	// targetreached를 true로 바꿈
-            target_x = -1; // 목표를 무효화
+            target_x = -1; // 목표를 무효화(-1은 없는 좌표)
             target_y = -1;
         }
 
@@ -100,7 +100,7 @@ public class BotWorm extends Worm {
                   target_y = closestfood.getY();
               } else if (target_x == -1) {    
                   // 먹이가 없고 목표도 없으면 무작위 목표 설정
-                  if (Math.random() < 0.05) {    
+                  if (Math.random() < 0.05) {    // 이 수치가 있는 이유는 매 프레임마다 계속 target좌표가 바뀌면 봇이 멍청해진다
                        target_x = (int) (Math.random() * gameWidth);
                        target_y = (int) (Math.random() * gameHeight);
                   }
@@ -127,8 +127,8 @@ public class BotWorm extends Worm {
         for (Food f : foods) {		// 모든 먹이 객체를 foods 객체의 개수만큼 순회한다
             double dx = f.getX() - target_x;	// 먹이의 x좌표와 목표지점 x좌표의 변화량을 구한다
             double dy = f.getY() - target_y;	// 먹이의 x좌표와 목표지점 y좌표의 변화량을 구한다
-            double fooddistance = dx * dx + dy * dy;	// 먹이의 거리 제곱 구함(유클리드 거리 공식)
-
+            double fooddistance = dx * dx + dy * dy;	// 먹이의 거리 제곱 구함
+            
             // 시야 범위 내에 들어온 먹이만 따로 리스트에 수집
             if (fooddistance < BOTSIGHT) {
                  visibleFoods.add(f);
